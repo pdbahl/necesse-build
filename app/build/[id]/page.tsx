@@ -101,6 +101,7 @@ export default function BuildPage() {
                   {build.trinket.map((trinket, index) => (
                   <p key={index} className="text-2xl font-bold text-white">{trinket}</p>
                   ))}
+              </div>
             </div>
 
             <div className="pb-4">
