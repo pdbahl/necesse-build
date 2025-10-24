@@ -231,7 +231,7 @@ export type ArmorSet = typeof armorSets[number];
 export interface Build {
   id: string;
   weapon: Weapon;
-  trinket: Trinket;
+  trinket: Trinket[];
   armor: ArmorSet;
   createdAt: string;
 }
