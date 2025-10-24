@@ -24,13 +24,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    /*
     if (!trinkets.includes(trinket)) {
       return NextResponse.json(
         { error: "Invalid trinket" },
         { status: 400 }
       );
     }
-
+*/
     if (!armorSets.includes(armor)) {
       return NextResponse.json(
         { error: "Invalid armor" },
