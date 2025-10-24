@@ -88,8 +88,15 @@ export default function Home() {
               </label>
               <select
                 id="trinket"
+                multiple
                 value={trinket}
-                onChange={(e) => setTrinket(e.target.value)}
+                onChange={(e) => {
+                    const selectedOptions = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setTrinket(selectedOptions);
+                  }}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >

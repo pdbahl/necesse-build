@@ -32,7 +32,7 @@ export async function getBuildsCollection(): Promise<Collection> {
 export async function saveBuild(build: {
   id: string;
   weapon: string;
-  trinket: string;
+  trinket: [];
   armor: string;
   createdAt: string;
 }) {
