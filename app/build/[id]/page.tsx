@@ -97,7 +97,10 @@ export default function BuildPage() {
 
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-sm font-medium text-gray-400 mb-2">TRINKET</h2>
-              <p className="text-2xl font-bold text-white">{build.trinket}</p>
+               <div className="space-y-1">
+                  {build.trinket.map((trinket, index) => (
+                  <p key={index} className="text-2xl font-bold text-white">{trinket}</p>
+                  ))}
             </div>
 
             <div className="pb-4">
