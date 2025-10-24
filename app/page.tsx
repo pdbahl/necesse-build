@@ -7,7 +7,7 @@ import { weapons, trinkets, armorSets } from "@/lib/gameData";
 export default function Home() {
   const router = useRouter();
   const [weapon, setWeapon] = useState("");
-  const [trinket, setTrinket] = useState("");
+  const [trinket, setTrinket] = useState<string[]>([]);
   const [armor, setArmor] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
