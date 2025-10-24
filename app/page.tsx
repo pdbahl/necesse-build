@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { Weapon, Trinket, ArmorSet } from "@/lib/gameData";
+import type { Weapon, Trinket, ArmorSet, Build } from "@/lib/gameData";
 import {
   weapons,
   trinkets,
@@ -50,6 +50,24 @@ export default function Home() {
   };
 
   const isFormValid = Boolean(weapon && armor && trinket.length > 0);
+
+  const [randomBuilds, setRandomBuilds] = useState<Build[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/builds/random")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!mounted) return;
+        if (Array.isArray(data)) setRandomBuilds(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load random builds:", err);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Small single-select dropdown with images for Weapon
   function WeaponDropdown({
@@ -364,6 +382,49 @@ export default function Home() {
               {loading ? "Creating Build..." : "Create Build"}
             </button>
           </form>
+        </div>
+
+        {/* Random builds panels */}
+        <div className="max-w-md mx-auto mt-8">
+          <h2 className="text-lg font-semibold text-white mb-4">Random Builds</h2>
+          <div className="grid grid-cols-1 gap-4">
+            {randomBuilds.length === 0 && (
+              <div className="text-sm text-gray-400">No builds yet.</div>
+            )}
+
+            {randomBuilds.map((b) => (
+              <a
+                key={b.id}
+                href={`/build/${b.id}`}
+                className="block bg-gray-700 rounded-lg p-3 hover:bg-gray-600 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-600/20">
+                    {b.weapon ? (
+                      <Image src={weaponImages[b.weapon as Weapon]} alt={b.weapon} width={48} height={48} />
+                    ) : null}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white">{b.weapon}</div>
+                    <div className="text-xs text-gray-300">{new Date(b.createdAt).toLocaleString()}</div>
+                  </div>
+                  <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-600/20">
+                    {b.armor ? (
+                      <Image src={armorImages[b.armor as ArmorSet]} alt={b.armor} width={40} height={40} />
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-2 flex gap-2 items-center">
+                  {b.trinket?.slice(0, 6).map((t) => (
+                    <div key={t} className="w-6 h-6 rounded-sm overflow-hidden bg-gray-600/20">
+                      <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
+                    </div>
+                  ))}
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>
