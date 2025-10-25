@@ -557,9 +557,11 @@ export default function Home() {
                 <div className="mt-2 flex gap-2 items-center">
                   {trinketSelections.slice(0, 6).map((t) => (
                     <div key={t.name} className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-sm overflow-hidden bg-gray-600/20">
-                        <Image src={trinketImages[t.name as Trinket]} alt={t.name} width={24} height={24} />
-                      </div>
+                        <div className="w-6 h-6 rounded-sm overflow-hidden bg-gray-600/20">
+                          {t.name ? (
+                            <Image src={trinketImages[t.name as Trinket]} alt={t.name} width={24} height={24} />
+                          ) : null}
+                        </div>
                       <div className="text-xs text-gray-300">
                         {t.enchantment ? <span>{t.enchantment}</span> : <span className="text-transparent">no-enchant</span>}
                       </div>
