@@ -32,9 +32,14 @@ export async function getBuildsCollection(): Promise<Collection> {
 export async function saveBuild(build: {
   id: string;
   weapon: string;
-  trinket: string[];
-  armor: string;
+  // store trinket selections; allow legacy string[] by using any in param shapes
+  trinket: any;
+  // armor may be legacy string or new selection object
+  armor: any;
   createdAt: string;
+  // Optional fields
+  title?: string;
+  description?: string;
 }) {
   const collection = await getBuildsCollection();
   await collection.insertOne(build);

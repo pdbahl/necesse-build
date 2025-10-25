@@ -81,11 +81,12 @@ export default function BuildPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
-            Necesse Build
+            {build.title ? build.title : "Necesse Build"}
           </h1>
-          <p className="text-gray-400">
-            Created on {new Date(build.createdAt).toLocaleDateString()}
-          </p>
+          <p className="text-gray-400">Created on {new Date(build.createdAt).toLocaleDateString()}</p>
+          {build.description ? (
+            <p className="mt-3 text-sm text-gray-300 max-w-prose mx-auto">{build.description}</p>
+          ) : null}
         </div>
 
         <div className="bg-gray-800 shadow-xl rounded-lg p-8 mb-6">
@@ -105,28 +106,69 @@ export default function BuildPage() {
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-sm font-medium text-gray-400 mb-2">TRINKETS</h2>
               <div className="space-y-2">
-                {build.trinket.map((trinket, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <img 
-                      src={trinketImages[trinket]} 
-                      alt={trinket}
-                      className="w-16 h-16 object-contain"
-                    />
-                    <p className="text-2xl font-bold text-white">{trinket}</p>
-                  </div>
-                ))}
+                {(() => {
+                  // Normalize legacy string[] trinket to selection objects
+                  const raw = (build as any).trinket;
+                  let selections: Array<{ name: string; enchantment?: string }> = [];
+                  if (Array.isArray(raw)) {
+                    if (raw.length > 0 && typeof raw[0] === "string") {
+                      selections = raw.map((s: string) => ({ name: s }));
+                    } else {
+                      selections = raw.map((r: any) => ({ name: r.name, enchantment: r.enchantment }));
+                    }
+                  }
+
+                  return selections.map((t, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <img
+                        src={(trinketImages as any)[t.name]}
+                        alt={t.name}
+                        className="w-16 h-16 object-contain"
+                      />
+                      <div>
+                        <p className="text-2xl font-bold text-white">{t.name}</p>
+                        {t.enchantment ? (
+                          <p className="text-sm text-gray-300">{t.enchantment}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             </div>
             
             <div className="pb-4">
               <h2 className="text-sm font-medium text-gray-400 mb-2">ARMOR</h2>
               <div className="flex items-center gap-4">
-                <img 
-                  src={armorImages[build.armor]} 
-                  alt={build.armor}
-                  className="w-16 h-16 object-contain"
-                />
-                <p className="text-2xl font-bold text-white">{build.armor}</p>
+                {(() => {
+                  const rawArmor = (build as any).armor;
+                  let armorSelection: { name?: string; enchantments?: string[] } = { name: undefined };
+                  if (typeof rawArmor === "string") armorSelection = { name: rawArmor };
+                  else if (rawArmor && typeof rawArmor === "object") {
+                    const rawE = rawArmor.enchantments ?? rawArmor.enchantment ?? undefined;
+                    armorSelection = { name: rawArmor.name, enchantments: Array.isArray(rawE) ? rawE : typeof rawE === "string" ? [rawE] : undefined };
+                  }
+
+                  return (
+                    <>
+                      {armorSelection.name ? (
+                        <>
+                          <img
+                            src={(armorImages as any)[armorSelection.name]}
+                            alt={armorSelection.name}
+                            className="w-16 h-16 object-contain"
+                          />
+                          <div>
+                            <p className="text-2xl font-bold text-white">{armorSelection.name}</p>
+                            {armorSelection.enchantments && armorSelection.enchantments.length > 0 ? (
+                              <p className="text-sm text-gray-300">Enchantments: {armorSelection.enchantments.join(', ')}</p>
+                            ) : null}
+                          </div>
+                        </>
+                      ) : null}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

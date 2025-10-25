@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { Weapon, Trinket, ArmorSet, Build } from "@/lib/gameData";
+import type { Weapon, Trinket, ArmorSet, Build, Enchantment } from "@/lib/gameData";
+import { enchantments } from "@/lib/gameData";
 import {
   weapons,
   trinkets,
@@ -16,8 +17,13 @@ import {
 export default function Home() {
   const router = useRouter();
   const [weapon, setWeapon] = useState<Weapon | "">("");
-  const [trinket, setTrinket] = useState<Trinket[]>([]);
+  // trinketSelections: array of { name: Trinket, enchantment?: Enchantment }
+  const [trinket, setTrinket] = useState<Array<{ name: Trinket; enchantment?: Enchantment }>>([]);
   const [armor, setArmor] = useState<ArmorSet | "">("");
+  // allow up to 3 enchantments for armor (may be empty strings until chosen)
+  const [armorEnchantments, setArmorEnchantments] = useState<Array<Enchantment | "">>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,12 +33,18 @@ export default function Home() {
     setLoading(true);
 
     try {
+      // prepare armor payload: send as object with optional enchantments when available
+      const filteredArmorEnchantments = (armorEnchantments || []).filter(Boolean) as Enchantment[];
+      const armorPayload = armor
+        ? (filteredArmorEnchantments.length > 0 ? { name: armor, enchantments: filteredArmorEnchantments } : { name: armor })
+        : armor;
+
       const response = await fetch("/api/builds", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ weapon, trinket, armor }),
+        body: JSON.stringify({ weapon, trinket, armor: armorPayload, title, description }),
       });
 
       if (!response.ok) {
@@ -52,6 +64,11 @@ export default function Home() {
   const isFormValid = Boolean(weapon && armor && trinket.length > 0);
 
   const [randomBuilds, setRandomBuilds] = useState<Build[]>([]);
+
+  // Render lists alphabetically for UI: don't mutate original exports
+  const sortedWeapons = [...weapons].slice().sort((a, b) => a.localeCompare(b));
+  const sortedTrinkets = [...trinkets].slice().sort((a, b) => a.localeCompare(b));
+  const sortedArmorSets = [...armorSets].slice().sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
     let mounted = true;
@@ -303,6 +320,31 @@ export default function Home() {
         <div className="bg-gray-800 shadow-xl rounded-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+                Title (optional)
+              </label>
+              <input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Short title for your build (optional)"
+                className="w-full px-3 py-2 h-10 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+                Description / Tips (optional)
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add any notes or tips for this build (optional)"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none h-24 resize-y"
+              />
+            </div>
+            <div>
               <label
                 htmlFor="weapon"
                 className="block text-sm font-medium text-gray-300 mb-2"
@@ -310,7 +352,7 @@ export default function Home() {
                 Weapon
               </label>
               <div className="flex items-center gap-4">
-                <WeaponDropdown items={(weapons as readonly Weapon[] as unknown) as Weapon[]} value={weapon} onChange={(v) => setWeapon(v)} />
+                <WeaponDropdown items={sortedWeapons} value={weapon} onChange={(v) => setWeapon(v)} />
               </div>
             </div>
 
@@ -322,38 +364,63 @@ export default function Home() {
                 Trinket
               </label>
 
-              {/* Checkbox-based multi-select with icons so users can click to toggle without holding Ctrl */}
-              <div className="w-full px-3 py-3 h-56 bg-gray-700 border border-gray-600 rounded-md text-white focus-within:ring-2 focus-within:ring-blue-500 overflow-auto">
-                <div className="space-y-2">
-                  {trinkets.map((t) => {
-                    const checked = trinket.includes(t);
-                    return (
-                      <label
-                        key={t}
-                        className="flex items-center gap-3 cursor-pointer select-none"
-                      >
-                        <input
-                          type="checkbox"
-                          value={t}
-                          checked={checked}
-                          onChange={() => {
-                            setTrinket((prev) =>
-                              prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-                            );
-                          }}
-                          className="h-4 w-4 text-blue-500 bg-gray-800 border-gray-600 rounded focus:ring-blue-400"
-                        />
+                          {/* Checkbox-based multi-select with per-trinket enchantment select */}
+                          <div className="w-full px-3 py-3 h-56 bg-gray-700 border border-gray-600 rounded-md text-white focus-within:ring-2 focus-within:ring-blue-500 overflow-auto">
+                          <div className="space-y-2">
+                            {sortedTrinkets.map((t) => {
+                                const selectedIndex = trinket.findIndex((s) => s.name === t);
+                                const selected = selectedIndex >= 0;
+                                return (
+                                  <div key={t} className="flex items-center gap-3">
+                                    <label className="flex items-center gap-3 cursor-pointer select-none flex-1">
+                                      <input
+                                        type="checkbox"
+                                        value={t}
+                                        checked={selected}
+                                        onChange={() => {
+                                          setTrinket((prev) => {
+                                            if (prev.find((x) => x.name === t)) {
+                                              return prev.filter((x) => x.name !== t);
+                                            }
+                                            return [...prev, { name: t }];
+                                          });
+                                        }}
+                                        className="h-4 w-4 text-blue-500 bg-gray-800 border-gray-600 rounded focus:ring-blue-400"
+                                      />
 
-                        <div className="w-6 h-6 flex-shrink-0 rounded-sm overflow-hidden bg-gray-600/20">
-                          <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
-                        </div>
+                                      <div className="w-6 h-6 flex-shrink-0 rounded-sm overflow-hidden bg-gray-600/20">
+                                        <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
+                                      </div>
 
-                        <span className="text-sm text-white">{t}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+                                      <span className="text-sm text-white">{t}</span>
+                                    </label>
+
+                                    {/* Enchantment select - shown when selected */}
+                                    <div className="w-48">
+                                      <select
+                                        disabled={!selected}
+                                        value={selected ? (trinket[selectedIndex].enchantment || "") : ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value as Enchantment | "";
+                                          setTrinket((prev) => {
+                                            return prev.map((s) => (s.name === t ? { ...s, enchantment: val || undefined } : s));
+                                          });
+                                        }}
+                                        className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 rounded disabled:opacity-60"
+                                      >
+                                        <option value="">No enchantment</option>
+                                        {enchantments.map((enc) => (
+                                          <option key={enc} value={enc}>
+                                            {enc}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
             </div>
 
             <div>
@@ -364,7 +431,39 @@ export default function Home() {
                 Armor
               </label>
               <div className="flex items-center gap-4">
-                <ArmorDropdown items={(armorSets as readonly ArmorSet[] as unknown) as ArmorSet[]} value={armor} onChange={(v) => setArmor(v)} />
+                <ArmorDropdown items={sortedArmorSets} value={armor} onChange={(v) => { setArmor(v); setArmorEnchantments([]); }} />
+                <div className="w-48">
+                  <div className="bg-gray-800 border border-gray-600 rounded px-2 py-2">
+                    <div className="text-xs text-gray-300 mb-1">Armor Enchantments (up to 3)</div>
+                    <div className="space-y-2">
+                      {[0, 1, 2].map((i) => (
+                        <select
+                          key={i}
+                          value={armorEnchantments[i] || ""}
+                          disabled={!armor}
+                          onChange={(e) => {
+                            const val = e.target.value as Enchantment | "";
+                            setArmorEnchantments((prev) => {
+                              const next = prev.slice();
+                              // ensure array has enough slots
+                              while (next.length <= i) next.push("");
+                              next[i] = val;
+                              return next;
+                            });
+                          }}
+                          className="w-full bg-gray-800 border border-gray-600 text-white px-2 py-1 rounded"
+                        >
+                          <option value="">No enchantment</option>
+                          {enchantments.map((enc) => (
+                            <option key={enc} value={enc}>
+                              {enc}
+                            </option>
+                          ))}
+                        </select>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -392,7 +491,26 @@ export default function Home() {
               <div className="text-sm text-gray-400">No builds yet.</div>
             )}
 
-            {randomBuilds.map((b) => (
+            {randomBuilds.map((b) => {
+              // defensive: coerce trinket field into an array of { name, enchantment? }
+              let trinketSelections: Array<{ name: string; enchantment?: string }> = [];
+              const raw = (b as any).trinket;
+              if (Array.isArray(raw)) {
+                if (raw.length > 0 && typeof raw[0] === "string") {
+                  trinketSelections = raw.map((s: string) => ({ name: s }));
+                } else {
+                  trinketSelections = raw.map((r: any) => ({ name: r.name, enchantment: r.enchantment }));
+                }
+              } else if (typeof raw === "string") {
+                try {
+                  const parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed)) trinketSelections = parsed.map((s: any) => (typeof s === "string" ? { name: s } : { name: s.name, enchantment: s.enchantment }));
+                } catch (err) {
+                  trinketSelections = raw.split(",").map((s: string) => ({ name: s.trim() })).filter((x) => x.name);
+                }
+              }
+
+              return (
               <a
                 key={b.id}
                 href={`/build/${b.id}`}
@@ -405,25 +523,51 @@ export default function Home() {
                     ) : null}
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-white">{b.weapon}</div>
+                    {b.title ? (
+                      <div className="text-sm font-semibold text-white">{b.title}</div>
+                    ) : null}
+
+                    <div className="text-sm font-medium text-gray-200">{b.weapon}</div>
                     <div className="text-xs text-gray-300">{new Date(b.createdAt).toLocaleString()}</div>
-                  </div>
-                  <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-600/20">
-                    {b.armor ? (
-                      <Image src={armorImages[b.armor as ArmorSet]} alt={b.armor} width={40} height={40} />
+
+                    {b.description ? (
+                      <div className="text-xs text-gray-300 mt-1 line-clamp-2">{b.description}</div>
                     ) : null}
                   </div>
-                </div>
+                  {/* normalize armor which may be legacy string or object */}
+                  {(() => {
+                      const rawArmor = (b as any).armor;
+                      let armorSelection: { name?: string; enchantments?: string[] } = { name: undefined };
+                      if (typeof rawArmor === "string") armorSelection = { name: rawArmor };
+                      else if (rawArmor && typeof rawArmor === "object") {
+                        const rawE = rawArmor.enchantments ?? rawArmor.enchantment ?? undefined;
+                        armorSelection = { name: rawArmor.name, enchantments: Array.isArray(rawE) ? rawE : typeof rawE === "string" ? [rawE] : undefined };
+                      }
+
+                      return (
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-600/20">
+                          {armorSelection.name ? (
+                            <Image src={(armorImages as any)[armorSelection.name]} alt={armorSelection.name} width={40} height={40} />
+                          ) : null}
+                        </div>
+                      );
+                  })()}
+                  </div>
 
                 <div className="mt-2 flex gap-2 items-center">
-                  {b.trinket?.slice(0, 6).map((t) => (
-                    <div key={t} className="w-6 h-6 rounded-sm overflow-hidden bg-gray-600/20">
-                      <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
+                  {trinketSelections.slice(0, 6).map((t) => (
+                    <div key={t.name} className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-sm overflow-hidden bg-gray-600/20">
+                        <Image src={trinketImages[t.name as Trinket]} alt={t.name} width={24} height={24} />
+                      </div>
+                      <div className="text-xs text-gray-300">
+                        {t.enchantment ? <span>{t.enchantment}</span> : <span className="text-transparent">no-enchant</span>}
+                      </div>
                     </div>
                   ))}
                 </div>
-              </a>
-            ))}
+              </a>);
+            })}
           </div>
         </div>
       </div>

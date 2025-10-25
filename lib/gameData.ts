@@ -352,6 +352,33 @@ export type Weapon = typeof weapons[number];
 export type Trinket = typeof trinkets[number];
 export type ArmorSet = typeof armorSets[number];
 
+// Enchantment options available for trinkets
+export const enchantments = [
+  "+Damage %",
+  "+Movement Speed %",
+  "+Attack Speed %",
+  "+Armor",
+  "+Crit Chance %",
+  "+Max Health",
+  "+Max Resilience",
+  "+Resilience Gain",
+  "+Mana Regen",
+] as const;
+
+export type Enchantment = typeof enchantments[number];
+
+export interface TrinketSelection {
+  name: Trinket;
+  // optional enchantment selected for this trinket
+  enchantment?: Enchantment;
+}
+
+export interface ArmorSelection {
+  name: ArmorSet;
+  // optional enchantments for armor (up to 3)
+  enchantments?: Enchantment[];
+}
+
 // Image mappings
 export const weaponImages: Record<Weapon, string> = {
   "Wood Sword": "/images/weapons/Wood_Sword.png",
@@ -410,7 +437,7 @@ export const weaponImages: Record<Weapon, string> = {
   "Razor Blade": "/images/weapons/Razor_Blade.png",
   "Night Razor": "/images/weapons/Night_Razor.png",
   "Glacial Boomerang": "/images/weapons/Glacial_Boomerang.png",
-  "Butcher's Cleaver": "/images/weapons/Butchers_Cleaver.png",
+  "Butcher's Cleaver": "/images/weapons/Butcher_Cleaver.png",
   "Dragons Rebound": "/images/weapons/Dragons_Rebound.png",
   "Heavy Hammer": "/images/weapons/Heavy_Hammer.png",
   "Boxing Glove Gun": "/images/weapons/Boxing_Glove_Gun.png",
@@ -418,11 +445,11 @@ export const weaponImages: Record<Weapon, string> = {
   "Carapace Dagger": "/images/weapons/Carapace_Dagger.png",
   "Galvanic Hammer": "/images/weapons/Galvanic_Hammer.png",
   "Dryad Greathammer": "/images/weapons/Dryad_Greathammer.png",
-  "Brute's Battleaxe": "/images/weapons/Brutes_Battleaxe.png",
+  "Brute's Battleaxe": "/images/weapons/Brute_Battleaxe.png",
   "Reaper Scythe": "/images/weapons/Reaper_Scythe.png",
   "Blood Claw": "/images/weapons/Blood_Claw.png",
-  "Anchor & Chain": "/images/weapons/Anchor_Chain.png",
-  "Chef's Special": "/images/weapons/Chefs_Special.png",
+  "Anchor & Chain": "/images/weapons/Anchor_&_Chain.png",
+  "Chef's Special": "/images/weapons/Chef_Special.png",
   "Void Claw": "/images/weapons/Void_Claw.png",
   "Wood Bow": "/images/weapons/Wood_Bow.png",
   "Copper Bow": "/images/weapons/Copper_Bow.png",
@@ -435,7 +462,7 @@ export const weaponImages: Record<Weapon, string> = {
   "Glacial Bow": "/images/weapons/Glacial_Bow.png",
   "Vultures Burst": "/images/weapons/Vultures_Burst.png",
   "Dryad Bow": "/images/weapons/Dryad_Bow.png",
-  "Captor's Shortbow": "/images/weapons/Captors_Shortbow.png",
+  "Captor's Shortbow": "/images/weapons/Captor_Shortbow.png",
   "The Crimson Sky": "/images/weapons/The_Crimson_Sky.png",
   "The Raven's Nest": "/images/weapons/The_Ravens_Nest.png",
   "Necrotic Bow": "/images/weapons/Necrotic_Bow.png",
@@ -553,7 +580,7 @@ export const trinketImages: Record<Trinket, string> = {
   "Magic Foci": "/images/trinkets/Magic_Foci.png",
   "Manica": "/images/trinkets/Manica.png",
   "Explorer Satchel": "/images/trinkets/Explorer_Satchel.png",
-  "Will-o'-Wisp Lantern": "/images/trinkets/Will-o-Wisp_Lantern.png",
+  "Will-o'-Wisp Lantern": "/images/trinkets/Will_o_Wisp_Lantern.png",
   "Range Foci": "/images/trinkets/Range_Foci.png",
   "Zephyr Boots": "/images/trinkets/Zephyr_Boots.png",
   "Mesmer Tablet": "/images/trinkets/Mesmer_Tablet.png",
@@ -592,7 +619,7 @@ export const trinketImages: Record<Trinket, string> = {
   "Aged Champion Scabbard": "/images/trinkets/Aged_Champion_Scabbard.png",
   "Spiked Boots": "/images/trinkets/Spiked_Boots.png",
   "Ninjas Mark": "/images/trinkets/Ninjas_Mark.png",
-  "Challenger's Pauldron": "/images/trinkets/Challengers_Pauldron.png",
+  "Challenger's Pauldron": "/images/trinkets/Challenger_Pauldron.png",
   "Frost Stone": "/images/trinkets/Frost_Stone.png",
   "Fire Stone": "/images/trinkets/Fire_Stone.png",
   "Spider Charm": "/images/trinkets/Spider_Charm.png",
@@ -600,7 +627,7 @@ export const trinketImages: Record<Trinket, string> = {
   "Hover Boots": "/images/trinkets/Hover_Boots.png",
   "Assassins Cowl": "/images/trinkets/Assassins_Cowl.png",
   "Second Wind Charm": "/images/trinkets/Second_Wind_Charm.png",
-  "Summoner's Bestiary": "/images/trinkets/Summoners_Bestiary.png",
+  "Summoner's Bestiary": "/images/trinkets/Summoner_Bestiary.png",
   "Guardian Bracelet": "/images/trinkets/Guardian_Bracelet.png",
   "Spirit Greaves": "/images/trinkets/Spirit_Greaves.png",
   "Spirit Board": "/images/trinkets/Spirit_Board.png",
@@ -648,7 +675,7 @@ export const armorImages: Record<ArmorSet, string> = {
   "Runic Hood Set": "/images/armor/Runic_Hood_Armor_Set.png",
   "Runic Crown Set": "/images/armor/Runic_Crown_Armor_Set.png",
   "Bloodplate Armor Set": "/images/armor/Bloodplate_Armor_Set.png",
-  "Witch Armor Set": "/images/armor/Witch_Armor_Set.png",
+  "Witch Armor Set": "/images/armor/Witch_Hat_Armor_Set.png",
   "Soldier Armor Set": "/images/armor/Soldier_Armor_Set.png",
   "Frost Hood Set": "/images/armor/Frost_Hood_Armor_Set.png",
   "Frost Hat Set": "/images/armor/Frost_Hat_Armor_Set.png",
@@ -706,7 +733,12 @@ export const armorImages: Record<ArmorSet, string> = {
 export interface Build {
   id: string;
   weapon: Weapon;
-  trinket: Trinket[];
-  armor: ArmorSet;
+  // Now store trinkets with optional enchantments
+  trinket: TrinketSelection[];
+  // store armor as selection with optional enchantments (up to 3)
+  armor: ArmorSelection;
   createdAt: string;
+  // Optional human-friendly title and description/tips provided by the user
+  title?: string;
+  description?: string;
 }
