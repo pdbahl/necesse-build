@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Build, weaponImages, trinketImages, armorImages } from "@/lib/gameData";
+import MissingImage from "../../components/MissingImage";
 
 export default function BuildPage() {
   const params = useParams();
@@ -94,11 +95,15 @@ export default function BuildPage() {
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-sm font-medium text-gray-400 mb-2">WEAPON</h2>
               <div className="flex items-center gap-4">
-                <img 
-                  src={weaponImages[build.weapon]} 
-                  alt={build.weapon}
-                  className="w-16 h-16 object-contain"
-                />
+                {weaponImages[build.weapon] ? (
+                  <img
+                    src={weaponImages[build.weapon]}
+                    alt={build.weapon}
+                    className="w-16 h-16 object-contain"
+                  />
+                ) : (
+                  <MissingImage size={64} className="rounded-md" />
+                )}
                 <p className="text-2xl font-bold text-white">{build.weapon}</p>
               </div>
             </div>
@@ -120,11 +125,15 @@ export default function BuildPage() {
 
                   return selections.map((t, index) => (
                     <div key={index} className="flex items-center gap-4">
-                      <img
-                        src={(trinketImages as any)[t.name]}
-                        alt={t.name}
-                        className="w-16 h-16 object-contain"
-                      />
+                      {(trinketImages as any)[t.name] ? (
+                        <img
+                          src={(trinketImages as any)[t.name]}
+                          alt={t.name}
+                          className="w-16 h-16 object-contain"
+                        />
+                      ) : (
+                        <MissingImage size={64} className="rounded-md" />
+                      )}
                       <div>
                         <p className="text-2xl font-bold text-white">{t.name}</p>
                         {t.enchantment ? (
@@ -151,13 +160,17 @@ export default function BuildPage() {
 
                   return (
                     <>
-                      {armorSelection.name ? (
+                          {armorSelection.name ? (
                         <>
-                          <img
-                            src={(armorImages as any)[armorSelection.name]}
-                            alt={armorSelection.name}
-                            className="w-16 h-16 object-contain"
-                          />
+                          {(armorImages as any)[armorSelection.name] ? (
+                            <img
+                              src={(armorImages as any)[armorSelection.name]}
+                              alt={armorSelection.name}
+                              className="w-16 h-16 object-contain"
+                            />
+                          ) : (
+                            <MissingImage size={64} className="rounded-md" />
+                          )}
                           <div>
                             <p className="text-2xl font-bold text-white">{armorSelection.name}</p>
                             {armorSelection.enchantments && armorSelection.enchantments.length > 0 ? (

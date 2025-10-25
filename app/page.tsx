@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import MissingImage from "./components/MissingImage";
 import type { Weapon, Trinket, ArmorSet, Build, Enchantment } from "@/lib/gameData";
 import { enchantments } from "@/lib/gameData";
 import {
@@ -130,10 +131,10 @@ export default function Home() {
           }}
         >
           <div className="w-8 h-8 rounded-md overflow-hidden bg-gray-600/30 flex items-center justify-center">
-            {value ? (
+            {value && weaponImages[value] ? (
               <Image src={weaponImages[value]} alt={value} width={32} height={32} />
             ) : (
-              <div className="text-xs text-gray-300">No image</div>
+              <MissingImage size={32} className="rounded-md" />
             )}
           </div>
           <span className="flex-1 text-left">{value || "Select a weapon..."}</span>
@@ -183,7 +184,11 @@ export default function Home() {
                 }}
               >
                 <div className="w-8 h-8 rounded-md overflow-hidden bg-gray-600/20">
-                  <Image src={weaponImages[it]} alt={it} width={32} height={32} />
+                  {weaponImages[it] ? (
+                    <Image src={weaponImages[it]} alt={it} width={32} height={32} />
+                  ) : (
+                    <MissingImage size={32} className="rounded-md" />
+                  )}
                 </div>
                 <span className="text-sm">{it}</span>
               </li>
@@ -238,10 +243,10 @@ export default function Home() {
           }}
         >
           <div className="w-8 h-8 rounded-md overflow-hidden bg-gray-600/30 flex items-center justify-center">
-            {value ? (
+            {value && armorImages[value] ? (
               <Image src={armorImages[value]} alt={value} width={32} height={32} />
             ) : (
-              <div className="text-xs text-gray-300">No image</div>
+              <MissingImage size={32} className="rounded-md" />
             )}
           </div>
           <span className="flex-1 text-left">{value || "Select armor..."}</span>
@@ -291,7 +296,11 @@ export default function Home() {
                 }}
               >
                 <div className="w-8 h-8 rounded-md overflow-hidden bg-gray-600/20">
-                  <Image src={armorImages[it]} alt={it} width={32} height={32} />
+                  {armorImages[it] ? (
+                    <Image src={armorImages[it]} alt={it} width={32} height={32} />
+                  ) : (
+                    <MissingImage size={32} className="rounded-md" />
+                  )}
                 </div>
                 <span className="text-sm">{it}</span>
               </li>
@@ -389,7 +398,11 @@ export default function Home() {
                                       />
 
                                       <div className="w-6 h-6 flex-shrink-0 rounded-sm overflow-hidden bg-gray-600/20">
-                                        <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
+                                        {trinketImages[t as Trinket] ? (
+                                          <Image src={trinketImages[t as Trinket]} alt={t} width={24} height={24} />
+                                        ) : (
+                                          <MissingImage size={24} className="rounded-sm" />
+                                        )}
                                       </div>
 
                                       <span className="text-sm text-white">{t}</span>
@@ -518,9 +531,11 @@ export default function Home() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-600/20">
-                    {b.weapon ? (
+                    {b.weapon && (weaponImages as any)[b.weapon] ? (
                       <Image src={weaponImages[b.weapon as Weapon]} alt={b.weapon} width={48} height={48} />
-                    ) : null}
+                    ) : (
+                      <MissingImage size={48} className="rounded-md" />
+                    )}
                   </div>
                   <div className="flex-1">
                     {b.title ? (
@@ -546,9 +561,11 @@ export default function Home() {
 
                       return (
                         <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-600/20">
-                          {armorSelection.name ? (
+                          {armorSelection.name && (armorImages as any)[armorSelection.name] ? (
                             <Image src={(armorImages as any)[armorSelection.name]} alt={armorSelection.name} width={40} height={40} />
-                          ) : null}
+                          ) : (
+                            <MissingImage size={40} className="rounded-md" />
+                          )}
                         </div>
                       );
                   })()}
